@@ -1,13 +1,69 @@
+import { useAppDispatch } from "@/redux/hook";
 import { Button } from "../ui/button";
+import { removeTodo, toggleComplete } from "@/redux/features/todoSlice";
+import { useUpdateTodoMutation } from "@/redux/api/api";
 
-const TodoCard = () => {
+interface TTodoCardProps {
+  _id: string;
+  title: string;
+  description: string;
+  isCompleted?: boolean;
+  priority: string;
+}
+
+const TodoCard = ({
+  _id,
+  title,
+  description,
+  isCompleted,
+  priority,
+}: TTodoCardProps) => {
+  const [updateTodo, { isLoading }] = useUpdateTodoMutation();
+  // const dispatch = useAppDispatch();
+  const toggleState = () => {
+    const taskData = {
+      title,
+      description,
+      _id,
+      priority,
+      isCompleted: !isCompleted,
+    };
+    const options = {
+      id: _id,
+      data: taskData,
+    };
+    updateTodo(options);
+    // dispatch(toggleComplete(id));
+  };
   return (
     <div>
       <div className="hover:bg-gray-100 bg-white border flex justify-between items-center gap-7 rounded-md p-3">
-        <input type="checkbox" name="" id="" />
-        <p>Todo Title</p>
-        <p>Time</p>
-        <p>Description</p>
+        <input
+          onChange={toggleState}
+          type="checkbox"
+          name="complete"
+          id="complete"
+          defaultChecked={isCompleted}
+        />
+        <p className="flex-1 font-semibold">{title}</p>
+        <div className="flex flex-1 items-center gap-2">
+          <div
+            className={`size-2 rounded-full 
+              ${priority == "High" ? "bg-red-500" : null}
+              ${priority == "Medium" ? "bg-yellow-500" : null}
+              ${priority == "Low" ? "bg-green-500" : null}
+            `}
+          ></div>
+          <p>{priority}</p>
+        </div>
+        <div className="flex-1">
+          {isCompleted ? (
+            <p className="text-green-500 ">Done</p>
+          ) : (
+            <p className="text-red-500">Pending</p>
+          )}
+        </div>
+        <p className="flex-2">{description}</p>
         <div className="space-x-5">
           <Button className="bg-green-900">
             <svg
@@ -25,7 +81,10 @@ const TodoCard = () => {
               />
             </svg>
           </Button>
-          <Button className="bg-red-950">
+          <Button
+            onClick={() => dispatch(removeTodo(id))}
+            className="bg-red-950"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
